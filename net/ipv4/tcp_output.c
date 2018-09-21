@@ -1139,30 +1139,13 @@ enum hrtimer_restart tcp_pace_kick(struct hrtimer *timer)
 	return HRTIMER_NORESTART;
 }
 
-static void tcp_update_skb_after_send(struct sock *sk, struct sk_buff *skb,
-				      u64 prior_wstamp)
+
+static void tcp_internal_pacing(struct sock *sk)
 {
-	struct tcp_sock *tp = tcp_sk(sk);
-
-	skb->skb_mstamp_ns = tp->tcp_wstamp_ns;
-	if (sk->sk_pacing_status != SK_PACING_NONE) {
-		unsigned long rate = sk->sk_pacing_rate;
-
-		/* Original sch_fq does not pace first 10 MSS
-		 * Note that tp->data_segs_out overflows after 2^32 packets,
-		 * this is a minor annoyance.
-		 */
-		if (rate != ~0UL && rate && tp->data_segs_out >= 10) {
-			u64 len_ns = div64_ul((u64)skb->len * NSEC_PER_SEC, rate);
-			u64 credit = tp->tcp_wstamp_ns - prior_wstamp;
-
-			/* take into account OS jitter */
-			len_ns -= min_t(u64, len_ns / 2, credit);
-			tp->tcp_wstamp_ns += len_ns;
-		}
-	}
-
-	hrtimer_start(&tp->pacing_timer, ktime_add_ns(now, len_ns),
+	if (!tcp_needs_internal_pacing(sk))
+		return;
+	hrtimer_start(&tcp_sk(sk)->pacing_timer,
+		      ns_to_ktime(tcp_sk(sk)->tcp_wstamp_ns),
 		      HRTIMER_MODE_ABS_PINNED_SOFT);
 	sock_hold(sk);
 }
@@ -1187,7 +1170,8 @@ static void tcp_update_skb_after_send(struct sock *sk, struct sk_buff *skb)
 		 */
 		if (rate != ~0U && rate && tp->data_segs_out >= 10) {
 			tp->tcp_wstamp_ns += div_u64((u64)skb->len * NSEC_PER_SEC, rate);
-			/* TODO: update internal pacing here */
+
+			tcp_internal_pacing(sk);
 		}
 	}
 	list_move_tail(&skb->tcp_tsorted_anchor, &tp->tsorted_sent_queue);
