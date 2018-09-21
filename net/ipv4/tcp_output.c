@@ -1161,6 +1161,21 @@ static void tcp_update_skb_after_send(struct sock *sk, struct sk_buff *skb,
 			tp->tcp_wstamp_ns += len_ns;
 		}
 	}
+
+	hrtimer_start(&tp->pacing_timer, ktime_add_ns(now, len_ns),
+		      HRTIMER_MODE_ABS_PINNED_SOFT);
+	sock_hold(sk);
+}
+
+static bool tcp_pacing_check(const struct sock *sk)
+{
+	return tcp_needs_internal_pacing(sk) &&
+	       hrtimer_is_queued(&tcp_sk(sk)->pacing_timer);
+}
+
+static void tcp_update_skb_after_send(struct tcp_sock *tp, struct sk_buff *skb)
+{
+	skb->skb_mstamp_ns = tp->tcp_wstamp_ns;
 	list_move_tail(&skb->tcp_tsorted_anchor, &tp->tsorted_sent_queue);
 }
 
