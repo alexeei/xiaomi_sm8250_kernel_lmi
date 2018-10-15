@@ -1065,8 +1065,9 @@ set_rcvbuf:
 			cmpxchg(&sk->sk_pacing_status,
 				SK_PACING_NONE,
 				SK_PACING_NEEDED);
-		sk->sk_max_pacing_rate = ulval;
-		sk->sk_pacing_rate = min(sk->sk_pacing_rate, ulval);
+		sk->sk_max_pacing_rate = (val == ~0U) ? ~0UL : val;
+		sk->sk_pacing_rate = min(sk->sk_pacing_rate,
+					 sk->sk_max_pacing_rate);
 		break;
 		}
 	case SO_INCOMING_CPU:
