@@ -253,7 +253,7 @@ static inline void update_avg(u64 *avg, u64 sample)
 
 static inline bool dl_entity_is_special(struct sched_dl_entity *dl_se)
 {
-#ifdef CONFIG_CPU_FREQ_GOV_SCHEDUTIL
+#if defined(CONFIG_CPU_FREQ_GOV_SCHEDUTIL)
 	return unlikely(dl_se->flags & SCHED_FLAG_SUGOV);
 #else
 	return false;
@@ -2843,7 +2843,7 @@ static inline unsigned long cpu_util_cfs(struct rq *rq)
 }
 #endif
 
-#ifdef CONFIG_CPU_FREQ_GOV_SCHEDUTIL
+#if defined(CONFIG_CPU_FREQ_GOV_SCHEDUTIL)
 
 unsigned long effective_cpu_util(int cpu, unsigned long util_cfs,
 				 unsigned long *min,
@@ -2918,7 +2918,7 @@ unsigned long scale_irq_capacity(unsigned long util, unsigned long irq, unsigned
 }
 #endif
 
-#ifdef CONFIG_ENERGY_MODEL
+#if defined(CONFIG_ENERGY_MODEL) && (defined(CONFIG_CPU_FREQ_GOV_SCHEDUTIL))
 #define perf_domain_span(pd) (to_cpumask(((pd)->em_pd->cpus)))
 DECLARE_STATIC_KEY_FALSE(sched_energy_present);
 

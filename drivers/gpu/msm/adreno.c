@@ -90,6 +90,9 @@ static unsigned int adreno_ft_regs_default[] = {
 /* Nice level for the higher priority GPU start thread */
 int adreno_wake_nice = -7;
 
+/* Number of milliseconds to stay active active after a wake on touch */
+unsigned int adreno_wake_timeout = 58;
+
 void adreno_reglist_write(struct adreno_device *adreno_dev,
 		const struct adreno_reglist *list, u32 count)
 {
