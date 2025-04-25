@@ -2912,9 +2912,13 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 	sk->sk_ll_usec		=	sysctl_net_busy_read;
 #endif
 
-	sk->sk_max_pacing_rate = ~0UL;
-	sk->sk_pacing_rate = ~0UL;
-	sk->sk_pacing_shift = 10;
+
+	sk->sk_max_pacing_rate = ~0U;
+	sk->sk_pacing_rate = ~0U;
+
+	
+	WRITE_ONCE(sk->sk_pacing_shift, 10);
+
 	sk->sk_incoming_cpu = -1;
 
 	sk_rx_queue_clear(sk);
