@@ -1687,7 +1687,7 @@ static s32 cake_enqueue(struct sk_buff *skb, struct Qdisc *sch,
 	ktime_t now = ktime_get();
 	struct cake_tin_data *b;
 	struct cake_flow *flow;
-	bool same_flow = false;
+	u32 idx, tin;
 
 	/* choose flow to insert into */
 	idx = cake_classify(sch, &b, skb, q->flow_mode, &ret);
@@ -1876,17 +1876,24 @@ static s32 cake_enqueue(struct sk_buff *skb, struct Qdisc *sch,
 	if (q->buffer_used > q->buffer_max_used)
 		q->buffer_max_used = q->buffer_used;
 
-	if (q->buffer_used <= q->buffer_limit)
-		return NET_XMIT_SUCCESS;
 
-	prev_qlen = sch->q.qlen;
-	prev_backlog = sch->qstats.backlog;
+	if (q->buffer_used > q->buffer_limit) {
+		bool same_flow = false;
+		u32 dropped = 0;
+		u32 drop_id;
 
-	while (q->buffer_used > q->buffer_limit) {
-		drop_id = cake_drop(sch, to_free);
-		if ((drop_id >> 16) == tin &&
-		    (drop_id & 0xFFFF) == idx)
-			same_flow = true;
+		while (q->buffer_used > q->buffer_limit) {
+			dropped++;
+			drop_id = cake_drop(sch, to_free);
+
+			if ((drop_id >> 16) == tin &&
+			    (drop_id & 0xFFFF) == idx)
+				same_flow = true;
+		}
+		b->drop_overlimit += dropped;
+
+		if (same_flow)
+			return NET_XMIT_CN;
 	}
 
 	prev_qlen -= sch->q.qlen;
