@@ -811,7 +811,6 @@ static inline u64 tcp_skb_timestamp_us(const struct sk_buff *skb)
 	return div_u64(skb->skb_mstamp_ns, NSEC_PER_USEC);
 }
 
-
 #define tcp_flag_byte(th) (((u_int8_t *)th)[13])
 
 #define TCPHDR_FIN 0x01
