@@ -60,6 +60,8 @@
 
 #include "internal.h"
 
+#include <linux/sched/signal.h>
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/vmscan.h>
 
@@ -3232,6 +3234,7 @@ static bool allow_direct_reclaim(pg_data_t *pgdat, bool using_kswapd)
 
 #define CRITICAL_OOM_SCORE_ADJ	(-900)
 
+
 static __always_inline bool task_is_critical(void)
 {
 	if (current->flags & PF_KTHREAD)
@@ -3306,7 +3309,8 @@ static bool throttle_direct_reclaim(gfp_t gfp_mask, struct zonelist *zonelist,
 	if (!pgdat)
 		goto out;
 
-	if (task_is_critical())
+
+if (task_is_critical())
 		goto out;
 
 	/* Account for the throttling */
