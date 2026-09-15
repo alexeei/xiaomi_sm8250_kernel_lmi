@@ -320,12 +320,6 @@ begin:
 	qdisc_bstats_update(sch, skb);
 	flow->deficit -= qdisc_pkt_len(skb);
 
-	return skb;
-}
-
-static void fq_codel_dequeue_drop(struct Qdisc *sch)
-{
-	struct fq_codel_sched_data *q = qdisc_priv(sch);
 
 	if (q->cstats.drop_count) {
 		qdisc_tree_reduce_backlog(sch, q->cstats.drop_count,
