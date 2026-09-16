@@ -16,14 +16,9 @@ CONFIG_THREAD_INFO_IN_TASK=y
 #
 # E404 Kernel Configuration
 #
-<<<<<<< HEAD
 #CONFIG_E404_ATTRIBUTES=y
 #CONFIG_E404_OPLUS=y
 # CONFIG_E404_MIUI is not set
-=======
-CONFIG_E404_ATTRIBUTES=y
-# CONFIG_E404_MIUI_DTBO_DEFAULT is not set
->>>>>>> 9cc9d3ab57a7 (e404_attr: cleanup unused configs and refine clarity)
 # CONFIG_E404_EFFCPU_DEFAULT is not set
 # CONFIG_E404_ALIOTH_5K_BATT_DEFAULT is not set
 
